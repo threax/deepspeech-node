@@ -8,6 +8,15 @@ var server = http.createServer ( function(request,response){
     }
     else if(request.method == "POST")
     {
+        let body = [];
+        request.on('data', (chunk) => {
+        body.push(chunk);
+        }).on('end', () => {
+        body = Buffer.concat(body).toString();
+            console.log(body);
+        });
+
+
         response.end("received POST request.");
     }
     else
