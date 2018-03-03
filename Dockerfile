@@ -5,3 +5,4 @@ RUN npm install node-wav
 
 COPY client.js client.js
 COPY server.js server.js
+COPY parser.js parser.js
