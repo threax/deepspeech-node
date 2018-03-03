@@ -34,12 +34,24 @@ const N_FEATURES = 26;
 // Size of the context window used for producing timesteps in the input vector
 const N_CONTEXT = 9;
 
-var parser = new ArgumentParser({addHelp: true});
-parser.addArgument(['model'], {help: 'Path to the model (protocol buffer binary file)'});
-parser.addArgument(['alphabet'], {help: 'Path to the configuration file specifying the alphabet used by the network'});
-parser.addArgument(['lm'], {help: 'Path to the language model binary file', nargs: '?'});
-parser.addArgument(['trie'], {help: 'Path to the language model trie file created with native_client/generate_trie', nargs: '?'});
-parser.addArgument(['audio'], {help: 'Path to the audio file to run (WAV format)'});
+function dumpKeys(obj){
+  for(var key in obj){
+    console.log(key);
+  }
+}
+
+function dumpObj(obj){
+  for(var key in obj){
+    console.log(key + ' ' + obj[key]);
+  }
+}
+
+var parser = new ArgumentParser({ addHelp: true });
+parser.addArgument(['model'], { help: 'Path to the model (protocol buffer binary file)' });
+parser.addArgument(['alphabet'], { help: 'Path to the configuration file specifying the alphabet used by the network' });
+parser.addArgument(['lm'], { help: 'Path to the language model binary file', nargs: '?' });
+parser.addArgument(['trie'], { help: 'Path to the language model trie file created with native_client/generate_trie', nargs: '?' });
+parser.addArgument(['audio'], { help: 'Path to the audio file to run (WAV format)' });
 var args = parser.parseArgs();
 
 console.log('model ' + args['model']);
@@ -53,9 +65,7 @@ function totalTime(hrtimeValue) {
 }
 
 const buffer = Fs.readFileSync(args['audio']);
-console.log('loaded buffer');
 const result = Wav.decode(buffer);
-console.log('decoded wav');
 
 if (result.sampleRate < 16000) {
   console.error('Warning: original sample rate (' + result.sampleRate + ') is lower than 16kHz. Up-sampling might produce erratic speech recognition.');
@@ -68,15 +78,13 @@ const model_load_end = process.hrtime(model_load_start);
 console.error('Loaded model in %ds.', totalTime(model_load_end));
 
 if (args['lm'] && args['trie']) {
-    console.error('Loading language model from files %s %s', args['lm'], args['trie']);
-    const lm_load_start = process.hrtime();
-    model.enableDecoderWithLM(args['alphabet'], args['lm'], args['trie'],
-                                LM_WEIGHT, WORD_COUNT_WEIGHT, VALID_WORD_COUNT_WEIGHT);
-    const lm_load_end = process.hrtime(lm_load_start);
-    console.error('Loaded language model in %ds.', totalTime(lm_load_end));
+  console.error('Loading language model from files %s %s', args['lm'], args['trie']);
+  const lm_load_start = process.hrtime();
+  model.enableDecoderWithLM(args['alphabet'], args['lm'], args['trie'],
+    LM_WEIGHT, WORD_COUNT_WEIGHT, VALID_WORD_COUNT_WEIGHT);
+  const lm_load_end = process.hrtime(lm_load_start);
+  console.error('Loaded language model in %ds.', totalTime(lm_load_end));
 }
-
-console.log('starting audio stream');
 
 function bufferToStream(buffer) {
   var stream = new Duplex();
@@ -87,19 +95,20 @@ function bufferToStream(buffer) {
 
 var audioStream = new MemoryStream();
 bufferToStream(buffer).
-  pipe(Sox({ output: { bits: 16, rate: 16000, channels: 1, type: 'raw' } })).
+  //pipe(Sox({ output: { bits: 16, rate: 16000, channels: 1, type: 'raw' } })).
   pipe(audioStream);
 
-console.log('created audio stream ' + audioStream);
-
 audioStream.on('finish', () => {
-    console.log('finish started');
+  console.log('finish started ');
 
   var audioBuffer = audioStream.toBuffer();
 
+  //dumpKeys(audioBuffer);
+  //console.log(audioBuffer.toJSON());
+
   const inference_start = process.hrtime();
   console.error('Running inference.');
-  const audioLength = (audioBuffer.length / 2) * ( 1 / 16000);
+  const audioLength = (audioBuffer.length / 2) * (1 / 16000);
 
   // We take half of the buffer_size because buffer is a char* while
   // LocalDsSTT() expected a short*
