@@ -53,26 +53,30 @@ function bufferToStream(buffer) {
     return stream;
 }
 
-function parse(buffer, args) {
-    const result = Wav.decode(buffer);
+var model;
 
-    if (result.sampleRate < 16000) {
-    console.error('Warning: original sample rate (' + result.sampleRate + ') is lower than 16kHz. Up-sampling might produce erratic speech recognition.');
-    }
-
+function start(args){
     console.error('Loading model from file %s', args['model']);
     const model_load_start = process.hrtime();
-    var model = new Ds.Model(args['model'], N_FEATURES, N_CONTEXT, args['alphabet'], BEAM_WIDTH);
+    model = new Ds.Model(args['model'], N_FEATURES, N_CONTEXT, args['alphabet'], BEAM_WIDTH);
     const model_load_end = process.hrtime(model_load_start);
     console.error('Loaded model in %ds.', totalTime(model_load_end));
 
     if (args['lm'] && args['trie']) {
-    console.error('Loading language model from files %s %s', args['lm'], args['trie']);
-    const lm_load_start = process.hrtime();
-    model.enableDecoderWithLM(args['alphabet'], args['lm'], args['trie'],
-        LM_WEIGHT, WORD_COUNT_WEIGHT, VALID_WORD_COUNT_WEIGHT);
-    const lm_load_end = process.hrtime(lm_load_start);
-    console.error('Loaded language model in %ds.', totalTime(lm_load_end));
+        console.error('Loading language model from files %s %s', args['lm'], args['trie']);
+        const lm_load_start = process.hrtime();
+        model.enableDecoderWithLM(args['alphabet'], args['lm'], args['trie'],
+            LM_WEIGHT, WORD_COUNT_WEIGHT, VALID_WORD_COUNT_WEIGHT);
+        const lm_load_end = process.hrtime(lm_load_start);
+        console.error('Loaded language model in %ds.', totalTime(lm_load_end));
+    }
+}
+
+function parse(buffer) {
+    const result = Wav.decode(buffer);
+
+    if (result.sampleRate < 16000) {
+    console.error('Warning: original sample rate (' + result.sampleRate + ') is lower than 16kHz. Up-sampling might produce erratic speech recognition.');
     }
 
     var audioStream = new MemoryStream();
@@ -101,5 +105,6 @@ function parse(buffer, args) {
 }
 
 module.exports = {
-    parse: parse
+    parse: parse,
+    start: start
 }
