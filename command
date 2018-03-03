@@ -6,3 +6,6 @@ docker run -it --rm --name deepspeech -v C:/Development/DeepSpeechModels/0.1.1:/
 
 build
 docker build -t deepspeech .
+
+run the server
+docker run -it --rm --name deepspeech -p 8080:80 -v C:/Development/DeepSpeechModels/0.1.1:/opt/deepspeech deepspeech node server.js
