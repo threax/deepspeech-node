@@ -53,8 +53,7 @@ function bufferToStream(buffer) {
     return stream;
 }
 
-module.exports = {
-    parse: function (buffer, args) {
+function parse(buffer, args) {
     const result = Wav.decode(buffer);
 
     if (result.sampleRate < 16000) {
@@ -100,4 +99,7 @@ module.exports = {
     console.error('Inference took %ds for %ds audio file.', totalTime(inference_stop), audioLength.toPrecision(4));
     });
 }
+
+module.exports = {
+    parse: parse
 }
