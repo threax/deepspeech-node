@@ -1,5 +1,15 @@
-import * as Ds from 'deepspeech';
 import * as Wav from 'node-wav';
+
+var Ds: any;
+
+try{
+    Ds = require('deepspeech-gpu');
+    console.log('Found GPU version of deepspeech.');
+}
+catch(e){
+    console.log('GPU version of deepspeech not found, using cpu version.');
+    Ds = require('deepspeech');
+}
 
 // These constants control the beam search decoder
 

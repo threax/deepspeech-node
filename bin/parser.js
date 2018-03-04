@@ -1,7 +1,15 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var Ds = require("deepspeech");
 var Wav = require("node-wav");
+var Ds;
+try {
+    Ds = require('deepspeech-gpu');
+    console.log('Found GPU version of deepspeech.');
+}
+catch (e) {
+    console.log('GPU version of deepspeech not found, using cpu version.');
+    Ds = require('deepspeech');
+}
 // These constants control the beam search decoder
 // Beam width used in the CTC decoder when building candidate transcriptions
 var BEAM_WIDTH = 500;
