@@ -1,14 +1,33 @@
 const http = require('http');
 const parser = require('./parser.js');
+const Pool = require('threads').Pool;
+const uuidv1 = require('uuid/v1');
 
-const modelBase = '/opt/deepspeech/';
+const pool = new Pool(1);
 
-parser.start({
-    model: modelBase + 'output_graph.pb',
-    alphabet: modelBase + 'alphabet.txt',
-    lm: modelBase + 'lm.binary',
-    trie: modelBase + 'trie'
-});
+pool.run('./worker.js')
+.send({});
+
+var responses = {};
+
+pool
+  .on('done', function(job, message) {
+      var response = responses[job.sendArgs[0].responseName];
+      if(response){
+        endRequest(200, response, message);
+      }
+  })
+  .on('error', function(job, error) {
+    console.error('Job errored:', error);
+    var response = responses[job.sendArgs[0].responseName];
+    if(response){
+        endRequest(500, response, error);
+    }
+  })
+  .on('finished', function() {
+    //console.log('Everything done, shutting down the thread pool.');
+    //pool.killAll();
+  });
 
 function endRequest(status, response, data){
     response.writeHead(status,{"Content-Type":"text\plain"});
@@ -23,9 +42,11 @@ var server = http.createServer ( function(request,response){
             body.push(chunk);
         }).on('end', () => {
             body = Buffer.concat(body);
-            parser.parse(body, function(result){
-                console.log('ending request');
-                endRequest(200, response, result);
+            var responseName = uuidv1(); //This is still 1 thread, so this should be unique enough
+            responses[responseName] = response;
+            pool.send({
+                body: body,
+                responseName: responseName
             });
         });
     }
