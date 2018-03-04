@@ -5,21 +5,27 @@ const uuidv1 = require('uuid/v1');
 
 const pool = new Pool(1);
 
-pool.run('./worker.js')
-.send({});
+pool.run('./worker.js').send({}); //Warms up deep speech, but still allows web server to start quickly.
 
 var responses = {};
+function getResponse(index){
+    var response = responses[index];
+    if(response){
+        delete responses[index];
+    }
+    return response;
+}
 
 pool
   .on('done', function(job, message) {
-      var response = responses[job.sendArgs[0].responseName];
+      var response = getResponse(job.sendArgs[0].responseName);
       if(response){
         endRequest(200, response, message);
       }
   })
   .on('error', function(job, error) {
     console.error('Job errored:', error);
-    var response = responses[job.sendArgs[0].responseName];
+    var response = getResponse(job.sendArgs[0].responseName);
     if(response){
         endRequest(500, response, error);
     }
