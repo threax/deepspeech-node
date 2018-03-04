@@ -1,0 +1,9 @@
+{
+    "include": [
+        "*.ts"
+    ],
+    "compilerOptions": {
+        "allowJs": true,
+        "target": "es5"
+    }
+}
