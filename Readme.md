@@ -23,12 +23,13 @@ This will run the container on the gpu using Linux.
 docker run -it --rm --runtime=nvidia --name deepspeech-gpu -p 8080:80 -v ~/dev/models:/opt/deepspeech deepspeech-gpu
 
 ## Make Request (Powershell)
-curl -method POST -infile test.wav -uri http://localhost:8080/stt
-
+Invoke-WebRequest -method POST -infile test.wav -uri http://serverurl:8080
 ## Kill Container
 docker kill deepspeech
 
-## Gpu Installation for Ubuntu
+docker kill deepspeech-gpu
+
+## Installation for Ubuntu on Docker with Gpu Support
 How to setup docker on an ubuntu machine that can run the gpu image. Setup for Nvidia gpus.
 
 ### Install Nvidia Drivers
