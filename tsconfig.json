@@ -4,6 +4,8 @@
     ],
     "compilerOptions": {
         "allowJs": true,
-        "target": "es5"
+        "target": "es5",
+        "noImplicitAny": false,
+        "outDir": "bin"
     }
 }

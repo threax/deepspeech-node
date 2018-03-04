@@ -5,7 +5,7 @@ RUN npm install node-wav
 RUN npm install threads
 RUN npm install uuid
 
-COPY client.js client.js
-COPY server.js server.js
-COPY parser.js parser.js
-COPY worker.js worker.js
+COPY bin/client.js client.js
+COPY bin/server.js server.js
+COPY bin/parser.js parser.js
+COPY bin/worker.js worker.js
