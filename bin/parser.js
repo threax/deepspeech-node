@@ -2,9 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var Ds = require("deepspeech");
 var Wav = require("node-wav");
-var stream_1 = require("stream");
-var MemoryStream = require("memory-stream");
-//const Sox = require('sox-stream');
 // These constants control the beam search decoder
 // Beam width used in the CTC decoder when building candidate transcriptions
 var BEAM_WIDTH = 500;
@@ -25,12 +22,6 @@ var N_CONTEXT = 9;
 function totalTime(hrtimeValue) {
     return (hrtimeValue[0] + hrtimeValue[1] / 1000000000).toPrecision(4);
 }
-function bufferToStream(buffer) {
-    var stream = new stream_1.Duplex();
-    stream.push(buffer);
-    stream.push(null);
-    return stream;
-}
 var model;
 function start(args) {
     console.error('Loading model from file %s', args['model']);
@@ -48,27 +39,22 @@ function start(args) {
 }
 exports.start = start;
 function parse(buffer, callback) {
-    var result = Wav.decode(buffer);
-    if (result.sampleRate != 16000) {
-        throw 'Error: sample rate (' + result.sampleRate + ') is not 16kHz. Input files must be 16kHz to work.';
+    var wavDecode = Wav.decode(buffer);
+    if (wavDecode.sampleRate != 16000) {
+        throw 'Error: sample rate (' + wavDecode.sampleRate + ') is not 16kHz. Input files must be 16kHz to work.';
     }
-    var audioStream = new MemoryStream();
-    bufferToStream(buffer).
-        pipe(audioStream);
-    audioStream.on('finish', function () {
-        var audioBuffer = audioStream.toBuffer();
-        var inference_start = process.hrtime();
-        console.log('Starting inference.');
-        var audioLength = (audioBuffer.length / 2) * (1 / 16000);
-        // We take half of the buffer_size because buffer is a char* while
-        // LocalDsSTT() expected a short*
-        var result = model.stt(audioBuffer.slice(0, audioBuffer.length / 2), 16000);
-        console.log(result);
-        var inference_stop = process.hrtime(inference_start);
-        console.log('Inference took %ds for %ds audio file.', totalTime(inference_stop), audioLength.toPrecision(4));
-        if (callback) {
-            callback(result);
-        }
-    });
+    var audioBuffer = buffer;
+    var inference_start = process.hrtime();
+    console.log('Starting inference.');
+    var audioLength = (audioBuffer.length / 2) * (1 / 16000);
+    // We take half of the buffer_size because buffer is a char* while
+    // LocalDsSTT() expected a short*
+    var result = model.stt(audioBuffer.slice(0, audioBuffer.length / 2), 16000);
+    console.log(result);
+    var inference_stop = process.hrtime(inference_start);
+    console.log('Inference took %ds for %ds audio file.', totalTime(inference_stop), audioLength.toPrecision(4));
+    if (callback) {
+        callback(result);
+    }
 }
 exports.parse = parse;
