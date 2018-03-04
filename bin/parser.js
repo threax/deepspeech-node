@@ -49,27 +49,23 @@ function start(args) {
 exports.start = start;
 function parse(buffer, callback) {
     var result = Wav.decode(buffer);
-    if (result.sampleRate < 16000) {
-        console.error('Warning: original sample rate (' + result.sampleRate + ') is lower than 16kHz. Up-sampling might produce erratic speech recognition.');
+    if (result.sampleRate != 16000) {
+        throw 'Error: sample rate (' + result.sampleRate + ') is not 16kHz. Input files must be 16kHz to work.';
     }
     var audioStream = new MemoryStream();
     bufferToStream(buffer).
-        //pipe(Sox({ output: { bits: 16, rate: 16000, channels: 1, type: 'raw' } })).
         pipe(audioStream);
     audioStream.on('finish', function () {
-        console.log('finish started ');
         var audioBuffer = audioStream.toBuffer();
-        //dumpKeys(audioBuffer);
-        //console.log(audioBuffer.toJSON());
         var inference_start = process.hrtime();
-        console.error('Running inference.');
+        console.log('Starting inference.');
         var audioLength = (audioBuffer.length / 2) * (1 / 16000);
         // We take half of the buffer_size because buffer is a char* while
         // LocalDsSTT() expected a short*
         var result = model.stt(audioBuffer.slice(0, audioBuffer.length / 2), 16000);
         console.log(result);
         var inference_stop = process.hrtime(inference_start);
-        console.error('Inference took %ds for %ds audio file.', totalTime(inference_stop), audioLength.toPrecision(4));
+        console.log('Inference took %ds for %ds audio file.', totalTime(inference_stop), audioLength.toPrecision(4));
         if (callback) {
             callback(result);
         }
