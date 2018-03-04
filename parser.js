@@ -72,11 +72,11 @@ function start(args){
     }
 }
 
-function parse(buffer) {
+function parse(buffer, callback) {
     const result = Wav.decode(buffer);
 
     if (result.sampleRate < 16000) {
-    console.error('Warning: original sample rate (' + result.sampleRate + ') is lower than 16kHz. Up-sampling might produce erratic speech recognition.');
+        console.error('Warning: original sample rate (' + result.sampleRate + ') is lower than 16kHz. Up-sampling might produce erratic speech recognition.');
     }
 
     var audioStream = new MemoryStream();
@@ -85,22 +85,26 @@ function parse(buffer) {
     pipe(audioStream);
 
     audioStream.on('finish', () => {
-    console.log('finish started ');
+        console.log('finish started ');
 
-    var audioBuffer = audioStream.toBuffer();
+        var audioBuffer = audioStream.toBuffer();
 
-    //dumpKeys(audioBuffer);
-    //console.log(audioBuffer.toJSON());
+        //dumpKeys(audioBuffer);
+        //console.log(audioBuffer.toJSON());
 
-    const inference_start = process.hrtime();
-    console.error('Running inference.');
-    const audioLength = (audioBuffer.length / 2) * (1 / 16000);
+        const inference_start = process.hrtime();
+        console.error('Running inference.');
+        const audioLength = (audioBuffer.length / 2) * (1 / 16000);
 
-    // We take half of the buffer_size because buffer is a char* while
-    // LocalDsSTT() expected a short*
-    console.log(model.stt(audioBuffer.slice(0, audioBuffer.length / 2), 16000));
-    const inference_stop = process.hrtime(inference_start);
-    console.error('Inference took %ds for %ds audio file.', totalTime(inference_stop), audioLength.toPrecision(4));
+        // We take half of the buffer_size because buffer is a char* while
+        // LocalDsSTT() expected a short*
+        var result = model.stt(audioBuffer.slice(0, audioBuffer.length / 2), 16000);
+        console.log(result);
+        const inference_stop = process.hrtime(inference_start);
+        console.error('Inference took %ds for %ds audio file.', totalTime(inference_stop), audioLength.toPrecision(4));
+        if(callback){
+            callback(result);
+        }
     });
 }
 

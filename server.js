@@ -10,27 +10,28 @@ parser.start({
     trie: modelBase + 'trie'
 });
 
+function endRequest(status, response, data){
+    response.writeHead(status,{"Content-Type":"text\plain"});
+    response.end(data);
+}
+
 var server = http.createServer ( function(request,response){
-    console.log(request.method);
-    response.writeHead(200,{"Content-Type":"text\plain"});
-    if(request.method == "GET")
-    {
-        response.end("received GET request.")
-    }
-    else if(request.method == "POST")
+    if(request.method == "POST")
     {
         let body = [];
         request.on('data', (chunk) => {
             body.push(chunk);
         }).on('end', () => {
             body = Buffer.concat(body);
-            var result = parser.parse(body);
-            response.end(result);
+            parser.parse(body, function(result){
+                console.log('ending request');
+                endRequest(200, response, result);
+            });
         });
     }
     else
     {
-        response.end("Undefined request .");
+        endRequest(500, response, "Undefined request .");
     }
 });
 
