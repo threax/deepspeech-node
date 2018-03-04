@@ -1,48 +1,22 @@
 import * as http from 'http';
-import * as parser from './parser.js';
+import * as parser from './parser';
 import { Pool } from 'threads';
-import * as uuidv1 from 'uuid/v1';
+import { ISendArgs } from './ISendArgs';
+import { ResponseManager } from './ResponseManager';
 
 const pool = new Pool(1);
 
 pool.run('./worker.js').send({}); //Warms up deep speech, but still allows web server to start quickly.
 
-interface ISendArgs {
-    body: ArrayBuffer;
-    name: string;
-}
-
-class ResponseManager {
-    private responses: { [key: string]: http.ServerResponse } = {};
-
-    public addResponse(response: http.ServerResponse): string {
-        var name = uuidv1();
-        while (this.responses[name] !== undefined) {
-            name = uuidv1();
-        }
-
-        this.responses[name] = response;
-        return name;
-    }
-
-    public getResponse(name) {
-        var response = this.responses[name];
-        if (response) {
-            delete this.responses[name];
-        }
-        return response;
-    }
-}
-
 var responses = new ResponseManager();
 
 pool
-    .on('done', function (job, message) {
+    .on('done', function (job: any, message: any) {
         var args: ISendArgs = job.sendArgs[0];
         var response = responses.getResponse(args.name);
         endRequest(200, response, message);
     })
-    .on('error', function (job, error) {
+    .on('error', function (job: any, error: any) {
         console.error('Job errored:', error);
         var args: ISendArgs = job.sendArgs[0];
         var response = responses.getResponse(args.name);
@@ -62,7 +36,7 @@ function endRequest(status: number, response: http.ServerResponse, data: string)
 
 var server = http.createServer(function (request, response) {
     if (request.method == "POST") {
-        let body = [];
+        let body: any[] = [];
         request.on('data', (chunk) => {
             body.push(chunk);
         }).on('end', () => {

@@ -14,6 +14,6 @@ module.exports = function (input, done) {
         parser.parse(buffer, done);
     }
     else {
-        done('No result');
+        done(null);
     }
 };

@@ -30,32 +30,27 @@ const N_FEATURES = 26;
 // Size of the context window used for producing timesteps in the input vector
 const N_CONTEXT = 9;
 
-function dumpKeys(obj){
-  for(var key in obj){
-    console.log(key);
-  }
-}
-
-function dumpObj(obj){
-  for(var key in obj){
-    console.log(key + ' ' + obj[key]);
-  }
-}
-
-function totalTime(hrtimeValue) {
+function totalTime(hrtimeValue: any) {
   return (hrtimeValue[0] + hrtimeValue[1] / 1000000000).toPrecision(4);
 }
 
-function bufferToStream(buffer) {
+function bufferToStream(buffer: Buffer) {
     var stream = new Duplex();
     stream.push(buffer);
     stream.push(null);
     return stream;
 }
 
-var model;
+export interface IStartArgs{
+    model: string;
+    alphabet: string;
+    lm: string;
+    trie: string;
+}
 
-export function start(args){
+var model: any;
+
+export function start(args: IStartArgs){
     console.error('Loading model from file %s', args['model']);
     const model_load_start = process.hrtime();
     model = new Ds.Model(args['model'], N_FEATURES, N_CONTEXT, args['alphabet'], BEAM_WIDTH);
@@ -72,7 +67,7 @@ export function start(args){
     }
 }
 
-export function parse(buffer, callback?) {
+export function parse(buffer: Buffer, callback?: (result: string | null) => void) {
     const result = Wav.decode(buffer);
 
     if (result.sampleRate < 16000) {

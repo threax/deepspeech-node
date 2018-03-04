@@ -22,16 +22,6 @@ var VALID_WORD_COUNT_WEIGHT = 1.00;
 var N_FEATURES = 26;
 // Size of the context window used for producing timesteps in the input vector
 var N_CONTEXT = 9;
-function dumpKeys(obj) {
-    for (var key in obj) {
-        console.log(key);
-    }
-}
-function dumpObj(obj) {
-    for (var key in obj) {
-        console.log(key + ' ' + obj[key]);
-    }
-}
 function totalTime(hrtimeValue) {
     return (hrtimeValue[0] + hrtimeValue[1] / 1000000000).toPrecision(4);
 }
