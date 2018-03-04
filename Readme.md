@@ -1,15 +1,22 @@
 # deepspeech-node
-This container will run a node webserver that will parse incoming 16kHz wav files to text using deepspeech from mozilla.
+This container will run a node webserver that will parse incoming 16kHz wav files to text using deepspeech from mozilla. It works on both the cpu and gpu version of the library using docker containers.
 
-## build
-### compile typescript
+## Build
+### Compile Typescript
 tsc
-### docker container
+### Cpu docker container
 docker build -t deepspeech .
 
-## run the server
-docker run -it --rm --name deepspeech -p 8080:80 -v C:/Development/DeepSpeechModels/0.1.1:/opt/deepspeech deepspeech
-docker run -it --rm --name deepspeech -p 8080:80 -v /home/threax/dev/models:/opt/deepspeech deepspeech
+### Gpu docker container
+docker build -f Dockerfile-gpu -t deepspeech-gpu .
+
+## Run the Server
+
+### Cpu
+* docker run -it --rm --name deepspeech -p 8080:80 -v C:/Development/DeepSpeechModels/0.1.1:/opt/deepspeech deepspeech
+
+### Gpu
+docker run -it --rm --runtime=nvidia --name deepspeech-gpu -p 8080:80 -v ~/dev/models:/opt/deepspeech deepspeech-gpu
 
 ## make request
 curl -method POST -infile test.wav -uri http://localhost:8080/stt
@@ -17,34 +24,24 @@ curl -method POST -infile test.wav -uri http://localhost:8080/stt
 ## kill container
 docker kill deepspeech
 
-## Gpu Version
-Also a gpu version based on nvidia/cuda docker image
+## Gpu Installation for Ubuntu
+How to setup docker on an ubuntu machine that can run the gpu image. Assumes nvidia drivers are installed.
 
-### Build
-docker build -f Dockerfile-gpu -t deepspeech-gpu .
-
-### Run
-docker run -it --rm --runtime=nvidia --name deepspeech-gpu -p 8080:80 -v C:/Development/DeepSpeechModels/0.1.1:/opt/deepspeech deepspeech-gpu
-docker run -it --rm --runtime=nvidia --name deepspeech-gpu -p 8080:80 -v /home/threax/dev/models:/opt/deepspeech deepspeech-gpu
-
-### Installation
-How to setup docker on an ubuntu machine that can run the gpu image.
-
-#### Install Docker
-sudo apt-get update
-sudo apt-get install apt-transport-https ca-certificates curl software-properties-common
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+### Install Docker
+1. sudo apt-get update
+1. sudo apt-get install apt-transport-https ca-certificates curl software-properties-common
+1. curl -fsSL https://download.docker.com/linux/ubuntu/gpg | 4. sudo apt-key add -
 sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-sudo apt-get update
-sudo apt-get install docker-ce
+1. sudo apt-get update
+1. sudo apt-get install docker-ce
 
-#### Install nvidia docker
-curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
-curl -s -L https://nvidia.github.io/nvidia-docker/ubuntu16.04/amd64/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
-sudo apt-get update
+### Install nvidia docker
+1. curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
+1. curl -s -L https://nvidia.github.io/nvidia-docker/ubuntu16.04/amd64/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
+1. sudo apt-get update
 
-sudo apt-get install nvidia-docker2
-sudo pkill -SIGHUP dockerd
+1. sudo apt-get install nvidia-docker2
+1. sudo pkill -SIGHUP dockerd
 
-#### test it with
+### Test Installation
 docker run --runtime=nvidia --rm nvidia/cuda nvidia-smi
