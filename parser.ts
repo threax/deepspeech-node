@@ -6,9 +6,14 @@ try{
     Ds = require('deepspeech-gpu');
     console.log('Found GPU version of deepspeech.');
 }
-catch(e){
+catch(gpuEx){
     console.log('GPU version of deepspeech not found, using cpu version.');
-    Ds = require('deepspeech');
+    try{
+        Ds = require('deepspeech');
+    }
+    catch(cpuEx){
+        throw 'Exceptions loading any deepspeech library:\nGpu: ' + gpuEx + '\nCpu: ' + cpuEx;
+    }
 }
 
 // These constants control the beam search decoder

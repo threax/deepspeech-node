@@ -15,3 +15,12 @@ curl -method POST -infile test.wav -uri http://localhost:8080/stt
 
 ## kill container
 docker kill deepspeech
+
+## Gpu Version
+Also a gpu version based on nvidia/cuda docker image
+
+### Build
+docker build -f Dockerfile-gpu -t deepspeech-gpu .
+
+### Run
+docker run -it --rm --name deepspeech-gpu -p 8080:80 -v C:/Development/DeepSpeechModels/0.1.1:/opt/deepspeech deepspeech-gpu
