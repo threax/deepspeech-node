@@ -53,3 +53,9 @@ How to setup docker on an ubuntu machine that can run the gpu image. Setup for N
 
 ### Test Installation
 sudo docker run --runtime=nvidia --rm nvidia/cuda nvidia-smi
+
+### Get the pre-trained model
+1. mkdir ~/dev
+1. cd ~/dev
+1. wget -O - https://github.com/mozilla/DeepSpeech/releases/download/v0.1.1/deepspeech-0.1.1-models.tar.gz | tar xvfz -
+1. Run the server with the command above.
