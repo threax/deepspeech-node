@@ -29,13 +29,18 @@ curl -method POST -infile test.wav -uri http://localhost:8080/stt
 docker kill deepspeech
 
 ## Gpu Installation for Ubuntu
-How to setup docker on an ubuntu machine that can run the gpu image. Assumes nvidia drivers are installed.
+How to setup docker on an ubuntu machine that can run the gpu image. Setup for Nvidia gpus.
+
+### Install Nvidia Drivers
+1. sudo add-apt-repository ppa:graphics-drivers/ppa
+1. sudo apt update
+1. sudo apt install nvidia-390
 
 ### Install Docker
 1. sudo apt-get update
 1. sudo apt-get install apt-transport-https ca-certificates curl software-properties-common
-1. curl -fsSL https://download.docker.com/linux/ubuntu/gpg | 4. sudo apt-key add -
-sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+1. curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+1. sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 1. sudo apt-get update
 1. sudo apt-get install docker-ce
 
@@ -43,9 +48,8 @@ sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubun
 1. curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
 1. curl -s -L https://nvidia.github.io/nvidia-docker/ubuntu16.04/amd64/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
 1. sudo apt-get update
-
 1. sudo apt-get install nvidia-docker2
 1. sudo pkill -SIGHUP dockerd
 
 ### Test Installation
-docker run --runtime=nvidia --rm nvidia/cuda nvidia-smi
+sudo docker run --runtime=nvidia --rm nvidia/cuda nvidia-smi
