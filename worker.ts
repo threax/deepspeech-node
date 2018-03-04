@@ -1,5 +1,5 @@
 import * as parser from './parser';
-import { ISendArgs } from './ISendArgs';
+import { ISendArgs, IParseResult } from './ISendArgs';
 
 const modelBase = '/opt/deepspeech/';
 
@@ -10,7 +10,7 @@ parser.start({
     trie: modelBase + 'trie'
 });
 
-export = function(input: ISendArgs, done: (result: string | null) => void) {
+export = function(input: ISendArgs, done: (result: IParseResult | null) => void) {
     var body = input.body;
     if(body){
         var buffer = Buffer.from((<any>body).data);

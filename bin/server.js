@@ -10,7 +10,7 @@ pool
     .on('done', function (job, message) {
     var args = job.sendArgs[0];
     var response = responses.getResponse(args.name);
-    endRequest(200, response, message);
+    endRequest(200, response, JSON.stringify(message));
 })
     .on('error', function (job, error) {
     console.error('Job errored:', error);
@@ -24,7 +24,7 @@ pool
 });
 function endRequest(status, response, data) {
     if (response) {
-        response.writeHead(status, { "Content-Type": "text\plain" });
+        response.writeHead(status, { "Content-Type": "application\json" });
         response.end(data);
     }
 }
@@ -42,7 +42,7 @@ var server = http.createServer(function (request, response) {
         });
     }
     else {
-        endRequest(500, response, "Undefined request .");
+        endRequest(500, response, "Undefined request.");
     }
 });
 server.listen(80);

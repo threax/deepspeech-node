@@ -56,18 +56,18 @@ function parse(buffer, callback) {
     if (wavDecode.sampleRate != 16000) {
         throw 'Error: sample rate (' + wavDecode.sampleRate + ') is not 16kHz. Input files must be 16kHz to work.';
     }
-    var audioBuffer = buffer;
     var inference_start = process.hrtime();
-    console.log('Starting inference.');
-    var audioLength = (audioBuffer.length / 2) * (1 / 16000);
+    var audioLength = (buffer.length / 2) * (1 / 16000);
     // We take half of the buffer_size because buffer is a char* while
     // LocalDsSTT() expected a short*
-    var result = model.stt(audioBuffer.slice(0, audioBuffer.length / 2), 16000);
-    console.log(result);
+    var result = model.stt(buffer.slice(0, buffer.length / 2), 16000);
     var inference_stop = process.hrtime(inference_start);
-    console.log('Inference took %ds for %ds audio file.', totalTime(inference_stop), audioLength.toPrecision(4));
     if (callback) {
-        callback(result);
+        callback({
+            result: result,
+            inferenceTime: totalTime(inference_stop),
+            audioLength: audioLength
+        });
     }
 }
 exports.parse = parse;
