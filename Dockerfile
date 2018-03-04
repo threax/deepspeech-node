@@ -6,3 +6,5 @@ RUN npm install threads
 RUN npm install uuid
 
 COPY bin ./
+
+CMD [ "node", "server.js" ]
