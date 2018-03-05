@@ -20,7 +20,15 @@ pool
         console.error('Job errored:', error);
         var args: ISendArgs = job.sendArgs[0];
         var response = responses.getResponse(args.name);
-        endRequest(500, response, 'Internal Server Error');
+        var message = 'Internal Server Error: ';
+        if(error.message){
+            message += error.message;
+        }
+        else{
+            message += 'Unknown Error';
+        }
+        console.error(message, error);
+        endRequest(500, response, message);
     })
     .on('finished', function () {
         //never stop
@@ -45,10 +53,12 @@ var server = http.createServer(function (request, response) {
                 name: responses.addResponse(response)
             };
             pool.send(args);
+        }).on('error', (err: Error) => {
+            endRequest(500, response, err.name + ': ' + err.message);
         });
     }
     else {
-        endRequest(500, response, "Undefined request.");
+        endRequest(500, response, "Not Supported.");
     }
 });
 

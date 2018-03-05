@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Wav = require("node-wav");
+var fs = require("fs");
 var Ds;
 try {
     Ds = require('deepspeech-gpu');
@@ -37,13 +38,25 @@ function totalTime(hrtimeValue) {
 }
 var model;
 function start(args) {
-    console.error('Loading model from file %s', args['model']);
+    console.log('Loading model from file %s', args['model']);
+    if (!fs.existsSync(args.model)) {
+        throw new Error('Cannot find ' + args.model);
+    }
+    if (!fs.existsSync(args.alphabet)) {
+        throw new Error('Cannot find ' + args.alphabet);
+    }
     var model_load_start = process.hrtime();
     model = new Ds.Model(args['model'], N_FEATURES, N_CONTEXT, args['alphabet'], BEAM_WIDTH);
     var model_load_end = process.hrtime(model_load_start);
     console.error('Loaded model in %ds.', totalTime(model_load_end));
     if (args['lm'] && args['trie']) {
-        console.error('Loading language model from files %s %s', args['lm'], args['trie']);
+        console.log('Loading language model from files %s %s', args['lm'], args['trie']);
+        if (!fs.existsSync(args.lm)) {
+            throw new Error('Cannot find ' + args.lm);
+        }
+        if (!fs.existsSync(args.trie)) {
+            throw new Error('Cannot find ' + args.trie);
+        }
         var lm_load_start = process.hrtime();
         model.enableDecoderWithLM(args['alphabet'], args['lm'], args['trie'], LM_WEIGHT, WORD_COUNT_WEIGHT, VALID_WORD_COUNT_WEIGHT);
         var lm_load_end = process.hrtime(lm_load_start);
@@ -51,7 +64,7 @@ function start(args) {
     }
 }
 exports.start = start;
-function parse(buffer, callback) {
+function parse(buffer) {
     var wavDecode = Wav.decode(buffer);
     if (wavDecode.sampleRate != 16000) {
         throw 'Error: sample rate (' + wavDecode.sampleRate + ') is not 16kHz. Input files must be 16kHz to work.';
@@ -62,12 +75,10 @@ function parse(buffer, callback) {
     // LocalDsSTT() expected a short*
     var result = model.stt(buffer.slice(0, buffer.length / 2), 16000);
     var inference_stop = process.hrtime(inference_start);
-    if (callback) {
-        callback({
-            result: result,
-            inferenceTime: totalTime(inference_stop),
-            audioLength: audioLength
-        });
-    }
+    return {
+        result: result,
+        inferenceTime: totalTime(inference_stop),
+        audioLength: audioLength
+    };
 }
 exports.parse = parse;

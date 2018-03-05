@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  deepspeech:
+    image: deepspeech
+    build:
+      context: .
+      dockerfile: Dockerfile
+    networks:
+      - public_proxy
+    volumes:
+      - C:/Development/DeepSpeechModels/0.1.1:/opt/deepspeech
+
+networks:
+  public_proxy:
+    external: true
